@@ -430,7 +430,7 @@ def install_munin_node(add_to_master=True):
     sudo('apt-get -yq install munin-node')
 
     # add allow IP to munin-node.conf -> allow IP must be escaped REGEX-style
-    ip = '%(hq)s' % env
+    ip = '%(hq_ip)s' % env
     ip.replace('.', '\\\.')
     sed('/etc/munin/munin-node.conf', '127\\\.0\\\.0\\\.1', '%s' % ip, use_sudo=True)
     sudo('service munin-node restart')
@@ -438,10 +438,12 @@ def install_munin_node(add_to_master=True):
     # add node to munin-master on Headquarters server so
     # system information is actually collected
     if add_to_master:
-        with settings(host_string='%(hq)s:22' % env):
+        with settings(host_string='%(hq_ip_vpn)s:22' % env):
             path = '/etc/munin/munin.conf'
             append(path, '[%(hostname)s]' % env, use_sudo=True)
             append(path, '    address %(server_ip)s' % env, use_sudo=True)
+            append(path, 'use_node_name yes', use_sudo=True)
+            append(path, 'tls disable', use_sudo=True)
             append(path, ' ', use_sudo=True)
 
 
